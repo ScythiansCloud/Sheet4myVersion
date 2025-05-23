@@ -31,9 +31,9 @@ def VelocityVerlet(x, y, z, vx, vy, vz, fx, fy, fz, xlo, xhi, ylo, yhi, zlo, zhi
         z[i] = ( z[i] + vz[i] * dt + fz[i] * dt * dt * 0.5 / mass)# % (zhi-zlo)
         
     # save the force at t
-    fx0 = fx.copy()
-    fy0 = fy.copy()
-    fz0 = fz.copy()
+    fx0 = fx.copy()         # tested it also only with fx and it still worked
+    fy0 = fy.copy()         # tested it also only with fy and it still worked
+    fz0 = fz.copy()         # tested it also only with fz and it still worked
     # update acceleration at t+dt
     fx, fy, fz, epot = force.forceLJ(x, y, z, xlo, xhi, ylo, yhi, zlo, zhi, eps, sigma, cutoff, epsWall, cutoffwall, sigWall)
 
@@ -57,3 +57,35 @@ def KineticEnergy(vx, vy, vz, mass):
     for i in prange(N):
         ekin += 0.5 * mass * (vx[i] * vx[i] + vy[i] * vy[i] + vz[i]* vz[i])
     return ekin
+
+
+######### added by Jonas ###########
+@njit
+def calc_rho(Ngr, hist):
+    rho = np.zeros(len(hist))
+    for i in range(len(hist)):
+        rho[i] = hist[i] / settings.N / Ngr
+
+    return rho
+
+
+@njit
+def update_hists(hist_x, hist_y, hist_z, x,y,z, dr, N):
+    for i in prange(N-1):
+        # j = i + 1
+        for j in range(i+1,N):
+            xij = force.pbc(x[i], x[j], settings.xlo, settings.xhi) # calculate pbc distance
+            yij = force.pbc(y[i], y[j], settings.ylo, settings.yhi) # can never exceed l/2
+            zij = abs(z[i] - z[j])         # can never exceed 2l
+ 
+            if xij != 0:
+                bin = int(xij / dr) # find the bin
+                hist_x[bin] += 2 # we are counting pairs
+            if yij != 0:
+                bin = int(yij / dr) # find the bin
+                hist_y[bin] += 2 # we are counting pairs
+            if zij != 0:
+                bin = int(zij / dr) # find the bin
+                hist_z[bin] += 2 # we are counting pairs
+
+    return hist_x, hist_y, hist_z

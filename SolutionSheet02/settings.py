@@ -10,9 +10,13 @@ import numpy as np
 
 def init():
     global eqsteps
-    eqsteps = 50000
+    eqsteps = 5000
     global nsteps            # number of time step to analyze
-    nsteps = 10
+    nsteps = 10000
+
+    global nAnalyze
+    nAnalyze = 10
+
     global mass              # mass of the LJ particles (gram/mole)
     mass = 39.95
     global kb                # boltzmann's constant (kcal/mole/K) 
@@ -33,6 +37,10 @@ def init():
     cutoffwall =0.0376 * 2.5
     global sigwall
     sigwall = 0.0376
+
+    # for histogramms
+    global dr 
+    dr = sig/30
     
     # number of particle = n1*n2 distributed on s square lattice
     global n1

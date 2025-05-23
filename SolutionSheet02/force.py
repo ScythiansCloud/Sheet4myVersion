@@ -57,22 +57,6 @@ def forceLJ(x, y, z, xlo, xhi, ylo, yhi, zlo, zhi, eps, sig, cutoff, epsWall, cu
             fz[i] -= prefacW* (sigfluidW9/(zhi-z[i])**10 - sigfluidW3/(zhi-z[i])**4)
         if zhi<z[i] or z[i]<0:
             print('particle escaped.....')
-
-
-    
-    # for i in prange(N):
-    #     d_bot  = z[i]        # z distance to left wall at z=0
-    #     d_top = 2*zhi - z[i]  # z distance to right wall at z=2L
-
-    #     if 0.0 < d_bot < cutoffwall:  # bottom
-    #         # -dU/dd =  (9*sig9/d^10 - 3*sig3/d^4) * prefacW
-    #         fz[i] += prefacW * (sigfluidW9/d_bot**10 - sigfluidW3/d_bot**4)
-    #         epot  += prefacW * (sigfluidW9/d_bot**9  - sigfluidW3/d_bot**3)
-
-    #     if 0.0 < d_top < cutoffwall:  # top
-    #         # same dU/dd, but dd/dz = -1 so we subtract
-    #         fz[i] -= prefacW * (sigfluidW9/d_top**10 - sigfluidW3/d_top**4)
-    #         epot  += prefacW * (sigfluidW9/d_top**9  - sigfluidW3/d_top**3)
                 
     return fx, fy, fz, epot
   
@@ -89,6 +73,9 @@ def pbc(xi, xj, xlo, xhi):
         rij = rij - np.sign(rij) * l 
         
     return rij
+
+
+
 
 # @njit
 # def pbc(xi, xj, xlo, xhi):
