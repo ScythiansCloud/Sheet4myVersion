@@ -1,0 +1,2 @@
+#### für  die b) den produktionrun als separate funktion umschreiben so das wir den dann in 6 teile aufteilen können und das gamma berehcnen können 
+Gamma is im prinzip die fläche unter der z-dichtekurve di in der mitte auf null gesetzt wurde (also bis zur mitte das integral nur)
