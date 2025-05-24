@@ -10,12 +10,12 @@ import numpy as np
 
 def init():
     global eqsteps
-    eqsteps = 5000
+    eqsteps = 50000
     global nsteps            # number of time step to analyze
-    nsteps = 10000
+    nsteps = 100000
 
     global nAnalyze
-    nAnalyze = 10
+    nAnalyze = 3
 
     global mass              # mass of the LJ particles (gram/mole)
     mass = 39.95
@@ -38,9 +38,6 @@ def init():
     global sigwall
     sigwall = 0.0376
 
-    # for histogramms
-    global dr 
-    dr = sig/30
     
     # number of particle = n1*n2 distributed on s square lattice
     global n1
@@ -57,6 +54,12 @@ def init():
     rho = 0.25 * sig**-3 # / \sigma^2
     global l
     l = (N/(2*rho))**(1/3)
+
+    # for histogramms
+    global dr 
+    dr = sigwall/30
+    global drxy
+    drxy = l/100
     
 
     # box size

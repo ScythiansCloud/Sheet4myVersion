@@ -35,7 +35,7 @@ def VelocityVerlet(x, y, z, vx, vy, vz, fx, fy, fz, xlo, xhi, ylo, yhi, zlo, zhi
     fy0 = fy.copy()         # tested it also only with fy and it still worked
     fz0 = fz.copy()         # tested it also only with fz and it still worked
     # update acceleration at t+dt
-    fx, fy, fz, epot = force.forceLJ(x, y, z, xlo, xhi, ylo, yhi, zlo, zhi, eps, sigma, cutoff, epsWall, cutoffwall, sigWall)
+    fx, fy, fz, f0, f2l,  epot = force.forceLJ(x, y, z, xlo, xhi, ylo, yhi, zlo, zhi, eps, sigma, cutoff, epsWall, cutoffwall, sigWall)
 
     # update the velocity
     for i in prange(N):        
@@ -43,7 +43,7 @@ def VelocityVerlet(x, y, z, vx, vy, vz, fx, fy, fz, xlo, xhi, ylo, yhi, zlo, zhi
         vy[i] += 0.5 * dt * (fy[i] + fy0[i]) / mass
         vz[i] += 0.5 * dt * (fz[i] + fz0[i]) / mass
     
-    return x, y, z, vx, vy, vz, fx, fy, fz, epot
+    return x, y, z, vx, vy, vz, fx, fy, fz, f0, f2l, epot
 
  
 @njit(parallel=True)
@@ -60,32 +60,46 @@ def KineticEnergy(vx, vy, vz, mass):
 
 
 ######### added by Jonas ###########
-@njit
-def calc_rho(Ngr, hist):
-    rho = np.zeros(len(hist))
-    for i in range(len(hist)):
-        rho[i] = hist[i] / settings.N / Ngr
+
+def calc_rho(Ngr, hist, dr):
+
+    rho = hist / settings.N / Ngr / dr
 
     return rho
 
 
 @njit
-def update_hists(hist_x, hist_y, hist_z, x,y,z, dr, N):
-    for i in prange(N-1):
-        # j = i + 1
-        for j in range(i+1,N):
-            xij = force.pbc(x[i], x[j], settings.xlo, settings.xhi) # calculate pbc distance
-            yij = force.pbc(y[i], y[j], settings.ylo, settings.yhi) # can never exceed l/2
-            zij = abs(z[i] - z[j])         # can never exceed 2l
- 
-            if xij != 0:
-                bin = int(xij / dr) # find the bin
-                hist_x[bin] += 2 # we are counting pairs
-            if yij != 0:
-                bin = int(yij / dr) # find the bin
-                hist_y[bin] += 2 # we are counting pairs
-            if zij != 0:
-                bin = int(zij / dr) # find the bin
-                hist_z[bin] += 2 # we are counting pairs
-
+def update_hists(hist_x, hist_y, hist_z, x,y,z, dr, drxy, N):
+    for i in prange(N):
+        binx = int(x[i]/drxy)
+        hist_x[binx] += 1
+        biny = int(y[i]/drxy)
+        hist_y[biny] += 1
+        binz = int(z[i]/dr)
+        hist_z[binz] += 1
     return hist_x, hist_y, hist_z
+
+
+
+
+
+
+
+    # for i in prange(N-1):
+    #     # j = i + 1
+    #     for j in range(i+1,N):
+    #         xij = force.pbc(x[i], x[j], settings.xlo, settings.xhi) # calculate pbc distance
+    #         yij = force.pbc(y[i], y[j], settings.ylo, settings.yhi) # can never exceed l/2
+    #         zij = abs(z[i] - z[j])         # can never exceed 2l
+ 
+    #         if xij != 0:
+    #             bin = int(xij / dr) # find the bin
+    #             hist_x[bin] += 2 # we are counting pairs
+    #         if yij != 0:
+    #             bin = int(yij / dr) # find the bin
+    #             hist_y[bin] += 2 # we are counting pairs
+    #         if zij != 0:
+    #             bin = int(zij / dr) # find the bin
+    #             hist_z[bin] += 2 # we are counting pairs
+
+    # return hist_x, hist_y, hist_z

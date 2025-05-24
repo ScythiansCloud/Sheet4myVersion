@@ -50,15 +50,21 @@ def forceLJ(x, y, z, xlo, xhi, ylo, yhi, zlo, zhi, eps, sig, cutoff, epsWall, cu
     sigfluidW3 = 3*sigWall**3
     sigfluidW9 = 9*sigWall**9
 
+    fwall0 = 0 # initialize force on the wall (action = reaction)
+    fwall2l = 0
     for i in prange(N):
         if z[i] < cutoffwall:
-            fz[i] += prefacW* (sigfluidW9/z[i]**10 - sigfluidW3/z[i]**4)
-        if (zhi-cutoff)<z[i] < zhi:
-            fz[i] -= prefacW* (sigfluidW9/(zhi-z[i])**10 - sigfluidW3/(zhi-z[i])**4)
+            f = prefacW* (sigfluidW9/z[i]**10 - sigfluidW3/z[i]**4)
+            fz[i] += f
+            fwall0 -= f
+        if (zhi-cutoffwall)<z[i] < zhi:
+            f = prefacW* (sigfluidW9/(zhi-z[i])**10 - sigfluidW3/(zhi-z[i])**4)
+            fz[i] -= f
+            fwall2l += f
         if zhi<z[i] or z[i]<0:
             print('particle escaped.....')
                 
-    return fx, fy, fz, epot
+    return fx, fy, fz, fwall0, fwall2l, epot
   
 @njit  
 def pbc(xi, xj, xlo, xhi):
